@@ -12,45 +12,43 @@ struct ListView: View {
 
     var body: some View {
         NavigationView {
-            List {
-                ForEach(listViewModel.items) { item in
-                    ListRowView(item: item)
-                        .onTapGesture {
-                            withAnimation(.bouncy) {
-                                listViewModel.updateItemCompletion(item: item)
-                            }
+            ZStack {
+                if listViewModel.items.isEmpty {
+                    EmptyView()
+                } else {
+                    List {
+                        ForEach(listViewModel.items) { item in
+                            ListRowView(item: item)
+                                .onTapGesture {
+                                    withAnimation(.bouncy) {
+                                        listViewModel.updateItemCompletion(item: item)
+                                    }
+                                }
                         }
+                        .onDelete(perform: listViewModel.removeItem)
+                        .onMove(perform: listViewModel.moveItem)
+                    }
+                    .listStyle(.plain)
                 }
-                .onDelete(perform: listViewModel.removeItem)
-                .onMove(perform: listViewModel.moveItem)
             }
-            .listStyle(.plain)
-            .navigationTitle("TodoList")
+            .navigationTitle("TodoList📝")
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
-                CustomToolbar()
+                ToolbarItem(placement: .topBarLeading) {
+                    EditButton()
+                        .bold()
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    NavigationLink("Add", destination: AddView())
+                        .bold()
+                }
             }
         }
     }
 }
 
-struct CustomToolbar: View {
-    @State var savedText: String = ""
-    var body: some View {
-        NavigationView { }
-        .toolbar {
-            ToolbarItem(placement: .topBarLeading) {
-                EditButton()
-            }
-            ToolbarItem(placement: .topBarTrailing) {
-                NavigationLink("Add", destination: AddView())
-            }
-        }
+struct ListViewPreview: PreviewProvider {
+    static var previews: some View {
+        ListView().environmentObject(ListViewModel())
     }
-}
-
-#Preview {
-    NavigationView {
-        ListView()
-    }.environmentObject(ListViewModel())
 }
